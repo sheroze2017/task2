@@ -1,0 +1,188 @@
+-- create database karachi_metro_corp
+use karachi_metro_corp;
+-- user auth 
+-- CREATE TABLE users (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     name VARCHAR(255) NOT NULL,
+--     email VARCHAR(255) UNIQUE NOT NULL,
+--     password VARCHAR(255) NOT NULL,
+--     district VARCHAR(100),   -- District where the user is located
+--     town VARCHAR(100),       -- Town within the district
+--     block VARCHAR(100),      -- Block within the town
+--     address TEXT,            -- Detailed address (house number, street, etc.)
+--     role ENUM('admin', 'user', 'operator') DEFAULT 'user', -- User role
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+-- );
+
+-- corp department
+-- CREATE TABLE departments (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     name VARCHAR(255) NOT NULL
+-- );
+
+-- user complain
+-- CREATE TABLE user_complaints (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     user_id INT NOT NULL,              -- ID of the user submitting the complaint
+--     department_id INT,                 -- ID of the department (allow NULL for foreign key constraint)
+--     complaint_body TEXT NOT NULL,       -- Text body of the complaint
+--     date_posted TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Date complaint was posted
+--     img_url VARCHAR(255),               -- Optional URL for an image attached to the complaint
+--     issue_duration VARCHAR(100),        -- Description of how long the issue has been faced
+--     
+--     -- Foreign key relationships
+--     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+--     FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
+-- );
+-- ALTER TABLE user_complaints
+-- ADD COLUMN status ENUM('pending', 'in progress', 'completed', 'incomplete') NOT NULL DEFAULT 'pending';
+
+-- DELIMITER //
+
+-- CREATE PROCEDURE addUser(
+--     IN p_name VARCHAR(255),
+--     IN p_email VARCHAR(255),
+--     IN p_password VARCHAR(255),
+--     IN p_district VARCHAR(100),
+--     IN p_town VARCHAR(100),
+--     IN p_block VARCHAR(100),
+--     IN p_address TEXT,
+--     IN p_role ENUM('admin', 'user', 'operator')
+-- )
+-- BEGIN
+--     INSERT INTO users (name, email, password, district, town, block, address, role)
+--     VALUES (p_name, p_email, p_password, p_district, p_town, p_block, p_address, p_role);
+-- END //
+
+-- DELIMITER ;
+-- select * from users
+-- DELIMITER //
+
+-- CREATE PROCEDURE addUserComplaint(
+--     IN userId INT,
+--     IN departmentId INT,
+--     IN complaintBody TEXT,
+--     IN imgUrl VARCHAR(255),
+--     IN issueDuration VARCHAR(100)
+-- )
+-- BEGIN
+--     INSERT INTO user_complaints (user_id, department_id, complaint_body, img_url, issue_duration, status)
+--     VALUES (userId, departmentId, complaintBody, imgUrl, issueDuration, 'pending');
+-- END //
+
+-- DELIMITER ;
+
+-- INSERT INTO departments (name) VALUES
+-- ('Anti-Encroachment Department'),
+-- ('Parks and Horticulture Department'),
+-- ('Sindh Solid Waste Management Department'),
+-- ('Health and Medical Services Department')
+
+-- DELIMITER $$
+
+-- CREATE PROCEDURE getUserComplaints(IN userId INT)
+-- BEGIN
+--     SELECT 
+--         uc.id,
+--         uc.department_id,
+--         uc.complaint_body,
+--         uc.date_posted,
+--         uc.img_url,
+--         uc.issue_duration,
+--         uc.status
+--     FROM 
+--         user_complaints uc
+--     WHERE 
+--         uc.user_id = userId;
+-- END$$
+
+-- DELIMITER ;
+
+
+-- DELIMITER $$
+
+-- -- CREATE PROCEDURE getAllComplaints()
+-- -- BEGIN
+-- --     SELECT 
+-- --         uc.id,
+-- --         uc.user_id,
+-- --         uc.department_id,
+-- --         uc.complaint_body,
+-- --         uc.date_posted,
+-- --         uc.img_url,
+-- --         uc.issue_duration,
+-- --         uc.status
+-- --     FROM 
+-- --         user_complaints uc;
+-- -- END$$
+
+-- DELIMITER ;
+
+-- DELIMITER //
+
+-- CREATE PROCEDURE UpdateComplaintStatus(
+--     IN complaintId INT,
+--     IN newStatus ENUM('pending', 'in progress', 'completed', 'incomplete')
+-- )
+-- BEGIN
+--     -- Update the status of the complaint
+--     UPDATE user_complaints
+--     SET status = newStatus
+--     WHERE id = complaintId;
+-- END //
+
+-- DELIMITER ;
+-- select * from user_complaints
+-- alter table user_complaints
+-- add column updatetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+-- DELIMITER $$
+-- DROP PROCEDURE IF EXISTS getAllComplaints;
+-- CREATE PROCEDURE getAllComplaints(
+--     IN startDate TIMESTAMP,
+--     IN endDate TIMESTAMP,
+--     IN departmentId INT,
+--     IN complaintStatus ENUM('pending', 'in progress', 'completed', 'incomplete')
+-- )
+-- BEGIN
+--     SELECT 
+--         uc.id,
+--         uc.user_id,
+--         uc.department_id,
+--         uc.complaint_body,
+--         uc.date_posted,
+--         uc.img_url,
+--         uc.issue_duration,
+--         uc.status
+--     FROM 
+--         user_complaints uc
+--     WHERE 
+--         (startDate IS NULL OR uc.date_posted >= startDate) AND
+--         (endDate IS NULL OR uc.date_posted <= endDate) AND
+--         (departmentId IS NULL OR uc.department_id = departmentId) AND
+--         (complaintStatus IS NULL OR uc.status = complaintStatus);
+-- END$$
+
+-- DELIMITER $$
+
+-- DROP PROCEDURE IF EXISTS addDepartment;
+-- CREATE PROCEDURE addDepartment(
+--     IN departmentName VARCHAR(255)
+-- )
+-- BEGIN
+--     INSERT INTO departments (name)
+--     VALUES (departmentName);
+-- END$$
+
+-- DELIMITER ;
+
+
+-- DELIMITER $$
+
+-- CREATE PROCEDURE getAllDepartment()
+-- BEGIN
+--    select * from departments;
+-- END$$
+
+-- DELIMITER ;
