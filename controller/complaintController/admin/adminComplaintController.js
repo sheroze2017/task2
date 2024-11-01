@@ -9,17 +9,22 @@ const adminComplaintController = {
         try {
             // Retrieve query parameters
             const { startDate, endDate, departmentId, complaintStatus } = req.query;
+            
+            // Default pagination values
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
     
             // Use promisify to enable async/await
-            console.log('nice')
             const query = promisify(db.query).bind(db);
-            const selectQuery = 'CALL getAllComplaints(?, ?, ?, ?)';
+            const selectQuery = 'CALL getAllComplaints(?, ?, ?, ?, ?, ?)';
             
             const values = [
                 startDate || null,
                 endDate || null,
                 departmentId || null,
-                complaintStatus || null
+                complaintStatus || null,
+                page,
+                limit
             ];
             
             // Execute the stored procedure
@@ -33,7 +38,12 @@ const adminComplaintController = {
             // Return successful response with data
             res.status(200).json({
                 success: true,
-                data: complaints
+                data: complaints,
+                pagination: {
+                    currentPage: page,
+                    pageSize: limit,
+                    totalRecords: complaints.length  // Note: This would be just for this page unless you calculate total rows in the database separately
+                }
             });
         } catch (error) {
             console.error(error);
@@ -41,6 +51,7 @@ const adminComplaintController = {
         }
     },
     
+
     updateComplain: async (req, res) => {
             try {
                 const { complaintId,status } = req.body;
