@@ -11,7 +11,6 @@ const adminOperationController = {
                     return res.status(400).json({ success: false, message: 'Department Name is required.' });
                 }
     
-                // Bind promisify to use async/await with db.query
                 const query = promisify(db.query).bind(db);
                 const insertQuery = 'CALL addDepartment(?)';
                 const values = [departmentName];
@@ -27,7 +26,6 @@ const adminOperationController = {
         },
     getAllDepartments: async (req, res) => {
             try {
-                // Retrieve query parameters
         
                 const query = promisify(db.query).bind(db);
                 const selectQuery = 'CALL getAllDepartment()';

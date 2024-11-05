@@ -1,6 +1,9 @@
 const db = require('../../config/db'); 
 const { promisify } = require('util');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+require('dotenv').config();
+
 
 
 const authController = {
@@ -18,6 +21,8 @@ const authController = {
             }
 
             const existingUser = user[0];
+            const token = jwt.sign(existingUser,  process.env.SECRET_KEY, { expiresIn: '1h' });
+
             const isMatch = await bcrypt.compare(password, existingUser.password);
             if (!isMatch) {
                 return res.status(401).json({ success: false, message: 'Invalid email or password.' });
@@ -31,6 +36,7 @@ const authController = {
                 block: existingUser.block ?? '',
                 address: existingUser.address ?? '',
                 role: existingUser.role ?? 'role',
+                token:token
             };
             res.status(200).json({ success: true, message: 'Login successful.', data: loggedInUser });
         } catch (error) {
